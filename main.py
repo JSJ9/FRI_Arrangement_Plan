@@ -1,142 +1,205 @@
-# # #https://github.com/ChenEating716/pybullet-URDF-models --for table and random objects
-# # #https://github.com/robot-descriptions/awesome-robot-descriptions?tab=readme-ov-file -- sawyer, we might not
-# # #need it tho because we are only using pybullet to get valid pointclouds
-# # import pybullet as p
-# # import time
-# # import pybullet_data
+#https://github.com/ChenEating716/pybullet-URDF-models --for table and random objects
+#https://github.com/robot-descriptions/awesome-robot-descriptions?tab=readme-ov-file -- sawyer, we might not
+#need it tho because we are only using pybullet to get valid pointclouds
+#https://github.com/RethinkRobotics/sawyer_robot.git
+# import pybullet as p
+# from time import sleep
+# import pybullet_data
 
-# # physicsClient = p.connect(p.GUI)#or p.DIRECT for non-graphical version
-# # p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally
-# # p.setGravity(0,0,-10)
-# # planeId = p.loadURDF("plane.urdf")
-# # startPos = [0,0,1]
-# # startOrientation = p.getQuaternionFromEuler([0,0,0])
-# # boxId = p.loadURDF("r2d2.urdf",startPos, startOrientation)
-# # sawyer = p.loadMJCF("")
-# # #set the center of mass frame (loadURDF sets base link frame) startPos/Ornp.resetBasePositionAndOrientation(boxId, startPos, startOrientation)
-# # for i in range (10000):
-# #     p.stepSimulation()
-# #     time.sleep(1./240.)
-# # cubePos, cubeOrn = p.getBasePositionAndOrientation(boxId)
-# # print(cubePos,cubeOrn)
-# # p.disconnect()
+# # def get_camera_params():
+# #     width = 640  # Example width, adjust as needed
+# #     height = 480  # Example height, adjust as needed
+# #     view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=[0, 0, 0],
+# #                                                       distance=2,
+# #                                                       yaw=0,
+# #                                                       pitch=-45,
+# #                                                       roll=0,
+# #                                                       upAxisIndex=2)
+# #     projection_matrix = p.computeProjectionMatrixFOV(fov=60,  # Example FOV, adjust as needed
+# #                                                      aspect=width / height,
+# #                                                      nearVal=0.01,
+# #                                                      farVal=100)
+# #     return width, height, view_matrix, projection_matrix
+
+# def main():
+#     physicsClient = p.connect(p.GUI)
+#     p.resetDebugVisualizerCamera(3, 90, -30, [0.0, -0.0, -0.0])
+#     p.setAdditionalSearchPath(pybullet_data.getDataPath())
+
+
+#     planeId = p.loadURDF("plane.urdf")
+#     cubeStartPos = [0, 0, 1]
+#     #cubeStartOrientation = p.getQuaternionFromEuler([0, 0, 0])
+#     tableId = p.loadURDF("table/table.urdf")
+#     boxID = p.loadURDF("cube.urdf", [0,0,5],  globalScaling=.1)
+#     #cubePos, cubeOrn = p.getBasePositionAndOrientation(boxId)
+#     p.setGravity(0, 0, -10)
+#     useRealTimeSimulation = 0
+
+#     if (useRealTimeSimulation):
+#         p.setRealTimeSimulation(1)
+
+#     while 1:
+#         if (useRealTimeSimulation):
+#             p.setGravity(0, 0, -10)
+#             sleep(0.01)  # Time in seconds.
+#         else:
+#             p.stepSimulation()
+
+# if __name__ == "__main__":
+#     main()   
+    
 # """..................................................................
 # ...................................................................
 # ....................................................................."""
-import os
-import time
-import pybullet as p
-import pybullet_data
-from urdf_models import models_data
-import random
-import numpy as np
-import open3d as o3d
+# import time
+# import pybullet as p
+# import pybullet_data
+# import numpy as np
+# import open3d as o3d
 
-def get_camera_params():
-    width = 640  # Example width, adjust as needed
-    height = 480  # Example height, adjust as needed
-    view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=[0, 0, 0],
-                                                      distance=5,
-                                                      yaw=0,
-                                                      pitch=-90,
-                                                      roll=0,
-                                                      upAxisIndex=2)
-    projection_matrix = p.computeProjectionMatrixFOV(fov=60,  # Example FOV, adjust as needed
-                                                     aspect=width / height,
-                                                     nearVal=0.01,
-                                                     farVal=100)
-    return width, height, view_matrix, projection_matrix
+# def get_camera_params():
+#     width = 640  # Example width, adjust as needed
+#     height = 480  # Example height, adjust as needed
+#     view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=[0, 0, 0],
+#                                                       distance=1.5,
+#                                                       yaw=0,
+#                                                       pitch=-90,
+#                                                       roll=0,
+#                                                       upAxisIndex=2)
+#     projection_matrix = p.computeProjectionMatrixFOV(fov=60,  # Example FOV, adjust as needed
+#                                                      aspect=width / height,
+#                                                      nearVal=0.01,
+#                                                      farVal=100)
+#     return width, height, view_matrix, projection_matrix
 
 
-def get_point_cloud(width, height, view_matrix, proj_matrix):
-    # Get a depth image
-    image_arr = p.getCameraImage(width=width, height=height, viewMatrix=view_matrix, projectionMatrix=proj_matrix)
-    depth = image_arr[3]
-    print(depth)
+# def get_point_cloud(width, height, view_matrix, proj_matrix):
+#     # Get a depth image
+#     image_arr = p.getCameraImage(width=width, height=height, viewMatrix=view_matrix, projectionMatrix=proj_matrix)
+#     depth = image_arr[3]
+#     print(depth)
 
-    # Create a grid with pixel coordinates and depth values
-    y, x = np.mgrid[-1:1:2 / height, -1:1:2 / width]
-    y *= -1.
-    x, y, z = x.reshape(-1), y.reshape(-1), depth.reshape(-1)
-    h = np.ones_like(z)
-    pixels = np.stack([x, y, z, h], axis=1)
+#     # Create a grid with pixel coordinates and depth values
+#     y, x = np.mgrid[-1:1:2 / height, -1:1:2 / width]
+#     y *= -1.
+#     x, y, z = x.reshape(-1), y.reshape(-1), depth.reshape(-1)
+#     h = np.ones_like(z)
+#     pixels = np.stack([x, y, z, h], axis=1)
     
-    # Filter out "infinite" depths
-    pixels = pixels[z < 0.99]
-    pixels[:, 2] = 2 * pixels[:, 2] - 1
+#     # Filter out "infinite" depths
+#     pixels = pixels[z < 0.99]
+#     pixels[:, 2] = 2 * pixels[:, 2] - 1
 
-    # Reshape matrices for matrix multiplication
-    proj_matrix = np.asarray(proj_matrix).reshape((4, 4))
-    view_matrix = np.asarray(view_matrix).reshape((4, 4))
+#     # Reshape matrices for matrix multiplication
+#     proj_matrix = np.asarray(proj_matrix).reshape((4, 4))
+#     view_matrix = np.asarray(view_matrix).reshape((4, 4))
 
-    # Transform pixels to world coordinates
-    tran_pix_world = np.linalg.inv(np.matmul(proj_matrix, view_matrix))
-    points = np.matmul(tran_pix_world, pixels.T).T
-    points /= points[:, 3: 4]
-    points = points[:, :3]
+#     # Transform pixels to world coordinates
+#     tran_pix_world = np.linalg.inv(np.matmul(proj_matrix, view_matrix))
+#     points = np.matmul(tran_pix_world, pixels.T).T
+#     points /= points[:, 3: 4]
+#     points = points[:, :3]
 
-    # Create an Open3D point cloud
-    pcd = o3d.geometry.PointCloud()
-    pcd.points = o3d.utility.Vector3dVector(points)
-    print(pcd)
+#     # Create an Open3D point cloud
+#     pcd = o3d.geometry.PointCloud()
+#     pcd.points = o3d.utility.Vector3dVector(points)
+#     print(pcd)
 
-    return pcd
+#     return pcd
 
-# initialize the GUI and others
-def main():
-    p.connect(p.GUI)
-    p.resetDebugVisualizerCamera(3, 90, -30, [0.0, -0.0, -0.0])
-    p.setTimeStep(1 / 240.)
-    p.setAdditionalSearchPath(pybullet_data.getDataPath())
-  
-    # load urdf data
-    models = models_data.model_lib()
+# # initialize the GUI and others
+# def main():
+#     p.connect(p.GUI)
+#     p.resetDebugVisualizerCamera(3, 90, -30, [0.0, -0.0, -0.0])
+#     p.setTimeStep(1 / 240.)
+#     p.setAdditionalSearchPath(pybullet_data.getDataPath())
+#     p.setGravity(0,0,-9.8)
 
-    # load model list
-    namelist = models.model_name_list
-    print("Look at what we have {}".format(namelist))
+#     # Load table and plane
+#     # p.loadURDF("plane.urdf",[0,0,0])
+#     # p.loadURDF("table/table.urdf", useFixedBase = True)
+#     # p.loadURDF("cube.urdf", [0,0,5],  globalScaling=.1)
+#     # p.loadURDF("xarm/xarm6_with_gripper.urdf", [.5,0,.5])
 
-    # Load table and plane
-    p.loadURDF("plane.urdf")
-    p.loadURDF("table/table.urdf")
-
-    # load the randomly picked model
-    flags = p.URDF_USE_INERTIA_FROM_FILE
-    # randomly get a model
-    for i in range(2):
-        random_model = namelist[random.randint(0, len(namelist)-1)] 
-        p.loadURDF(models[random_model], [0., 0., 0.8 + 0.15*i], flags=flags)
         
-    p.setGravity(0,0,-9.8)
+#     useFixedBase = True
+#     flags = p.URDF_INITIALIZE_SAT_FEATURES#0#p.URDF_USE_SELF_COLLISION
+
+#     #plane_pos = [0,0,0]
+#     #plane = p.loadURDF("plane.urdf", plane_pos, flags = flags, useFixedBase=useFixedBase)
+#     table_pos = [0,0,-0.625]
+#     table = p.loadURDF("table/table.urdf", table_pos, flags = flags, useFixedBase=useFixedBase)
+#     xarm = p.loadURDF("xarm/xarm6_with_gripper.urdf", flags = flags, useFixedBase=useFixedBase)
+#     p.loadURDF("cube.urdf", [0,0,5],  globalScaling=.1)
+
+#     jointIds = []
+#     paramIds = []
+
+#     for j in range(p.getNumJoints(xarm)):
+#         p.changeDynamics(xarm, j, linearDamping=0, angularDamping=0)
+#         info = p.getJointInfo(xarm, j)
+#         #print(info)
+#         jointName = info[1]
+#         jointType = info[2]
+#     if (jointType == p.JOINT_PRISMATIC or jointType == p.JOINT_REVOLUTE):
+#         jointIds.append(j)
+#         paramIds.append(p.addUserDebugParameter(jointName.decode("utf-8"), -4, 4, 0))
     
-    # Simulation parameters
-    max_steps = 1000  # Number of simulation steps before displaying point cloud
-    current_step = 0
+#     skip_cam_frames = 10  
+
+#     while (1):
+#         p.stepSimulation()
+#         for i in range(len(paramIds)):
+#             c = paramIds[i]
+#             targetPos = p.readUserDebugParameter(c)
+#             p.setJointMotorControl2(xarm, jointIds[i], p.POSITION_CONTROL, targetPos, force=5 * 240.)
+#         skip_cam_frames -= 1
+#         if (skip_cam_frames<0):
+#             p.getCameraImage(320,200, renderer=p.ER_BULLET_HARDWARE_OPENGL )
+#             skip_cam_frames = 10
+#         # point_cloud = get_point_cloud(width, height, view_matrix, projection_matrix)
+#         # print(type(point_cloud))
+        
+#         # # Visualize point cloud using Open3D
+#         # o3d.visualization.draw_geometries([point_cloud])
+
+#         time.sleep(1./240.)
+	
+
+    
+    # # Simulation parameters
+    # max_steps = 1000  # Number of simulation steps before displaying point cloud
+    # current_step = 0
 
     # Main simulation loop
-    while True:
-    # Get camera parameters
-        width, height, view_matrix, projection_matrix = get_camera_params()
+    # while True:
+    # # Get camera parameters
+    #     width, height, view_matrix, projection_matrix = get_camera_params()
 
-        # Perform simulation step
-        p.stepSimulation()
+    #     # Perform simulation step
+    #     p.stepSimulation()
 
-        current_step += 1
+    #     current_step += 1
 
-        # Generate point cloud after a certain number of steps
-        if current_step >= max_steps:
-            # Reset current step count
-            current_step = 0
+    #     # # Generate point cloud after a certain number of steps
+    #     # if current_step >= max_steps:
+    #     #     # Reset current step count
+    #     #     current_step = 0
 
-            # Generate point cloud
-            point_cloud = get_point_cloud(width, height, view_matrix, projection_matrix)
-            print(type(point_cloud))
-            
-            # Visualize point cloud using Open3D
-            o3d.visualization.draw_geometries([point_cloud])
+    #     # Generate point cloud
+    #     point_cloud = get_point_cloud(width, height, view_matrix, projection_matrix)
+    #     print(type(point_cloud))
+        
+    #     # Visualize point cloud using Open3D
+    #     o3d.visualization.draw_geometries([point_cloud])
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
+
+# ---------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 # # NEW CODE BELOW
 # import pybullet as p
@@ -246,3 +309,125 @@ if __name__ == "__main__":
 
 # if __name__ == "__main__":
 #     main()
+#--------------------------------------------------------------------------
+#---------------------------------------------------------------------------
+
+import pybullet as p
+import pybullet_data as pd
+import time
+import open3d as o3d
+import numpy as np
+
+def get_camera_params():
+    width = 640  # Example width, adjust as needed
+    height = 480  # Example height, adjust as needed
+    view_matrix = p.computeViewMatrixFromYawPitchRoll(cameraTargetPosition=[0, 0, 0],
+                                                      distance=1,
+                                                      yaw=0,
+                                                      pitch=-90,
+                                                      roll=0,
+                                                      upAxisIndex=2)
+    projection_matrix = p.computeProjectionMatrixFOV(fov=60,  # Example FOV, adjust as needed
+                                                     aspect=width / height,
+                                                     nearVal=0.01,
+                                                     farVal=100)
+    return width, height, view_matrix, projection_matrix
+
+
+def get_point_cloud(width, height, view_matrix, proj_matrix):
+    # Get a depth image
+    image_arr = p.getCameraImage(width=width, height=height, viewMatrix=view_matrix, projectionMatrix=proj_matrix)
+    depth = image_arr[3]
+    print(depth)
+
+    # Create a grid with pixel coordinates and depth values
+    y, x = np.mgrid[-1:1:2 / height, -1:1:2 / width]
+    y *= -1.
+    x, y, z = x.reshape(-1), y.reshape(-1), depth.reshape(-1)
+    h = np.ones_like(z)
+    pixels = np.stack([x, y, z, h], axis=1)
+    
+    # Filter out "infinite" depths
+    pixels = pixels[z < 0.99]
+    pixels[:, 2] = 2 * pixels[:, 2] - 1
+
+    # Reshape matrices for matrix multiplication
+    proj_matrix = np.asarray(proj_matrix).reshape((4, 4))
+    view_matrix = np.asarray(view_matrix).reshape((4, 4))
+
+    # Transform pixels to world coordinates
+    tran_pix_world = np.linalg.inv(np.matmul(proj_matrix, view_matrix))
+    points = np.matmul(tran_pix_world, pixels.T).T
+    points /= points[:, 3: 4]
+    points = points[:, :3]
+
+    # Create an Open3D point cloud
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points)
+    return pcd
+
+
+def main():
+    p.connect(p.GUI)#, options="--background_color_red=1.0 --background_color_blue=1.0 --background_color_green=1.0")
+    p.setAdditionalSearchPath(pd.getDataPath())
+    p.setGravity(0,0,-9.8)
+
+    useFixedBase = True
+    flags = p.URDF_INITIALIZE_SAT_FEATURES#0#p.URDF_USE_SELF_COLLISION
+
+    #plane_pos = [0,0,0]
+    #plane = p.loadURDF("plane.urdf", plane_pos, flags = flags, useFixedBase=useFixedBase)
+    table_pos = [0,0,-0.625]
+    plane_pos = [0,0,-0.625]
+    plane = p.loadURDF("plane.urdf", plane_pos, flags = flags, useFixedBase=useFixedBase)
+    table = p.loadURDF("table/table.urdf", table_pos, flags = flags, useFixedBase=useFixedBase)
+    xarm = p.loadURDF("xarm/xarm6_with_gripper.urdf", [.7,0,0], flags = flags, useFixedBase=useFixedBase)
+    cube = p.loadURDF("cube.urdf", flags= flags, globalScaling=.1)
+
+    jointIds = []
+    paramIds = []
+
+    for j in range(p.getNumJoints(xarm)):
+        p.changeDynamics(xarm, j, linearDamping=0, angularDamping=0)
+        info = p.getJointInfo(xarm, j)
+        #print(info)
+        jointName = info[1]
+        jointType = info[2]
+        if (jointType == p.JOINT_PRISMATIC or jointType == p.JOINT_REVOLUTE):
+            jointIds.append(j)
+            paramIds.append(p.addUserDebugParameter(jointName.decode("utf-8"), -4, 4, 0))
+    
+    skip_cam_frames = 10  
+
+    max_steps = 1000  # Number of simulation steps before displaying point cloud
+    current_step = 0
+
+    while (1):
+        width, height, view_matrix, projection_matrix = get_camera_params()
+        p.stepSimulation()
+        current_step += 1
+
+        # # Generate point cloud after a certain number of steps
+        if current_step >= max_steps:
+            # Reset current step count
+            current_step = 0
+
+        # Generate point cloud
+        point_cloud = get_point_cloud(width, height, view_matrix, projection_matrix)
+        print(type(point_cloud))
+        
+        # Visualize point cloud using Open3D
+        o3d.visualization.draw_geometries([point_cloud])
+
+        for i in range(len(paramIds)):
+            c = paramIds[i]
+            targetPos = p.readUserDebugParameter(c)
+            p.setJointMotorControl2(xarm, jointIds[i], p.POSITION_CONTROL, targetPos, force=5 * 240.)
+        skip_cam_frames -= 1
+        if (skip_cam_frames<0):
+            p.getCameraImage(320,200, renderer=p.ER_BULLET_HARDWARE_OPENGL )
+            skip_cam_frames = 10
+        time.sleep(1./240.)
+        
+if __name__ == "__main__":
+    main()
