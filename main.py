@@ -131,169 +131,227 @@
 
 #---------------------------------------------------------------------
 #---------------------------------------------------------------------
-import pybullet as p
-import math
-import numpy as np
-import pybullet_data
-import open3d as o3d
+# import pybullet as p
+# import math
+# import numpy as np
+# import pybullet_data
+# import open3d as o3d
 
-p.connect(p.GUI)
-p.setAdditionalSearchPath(pybullet_data.getDataPath())
-# plane = p.loadURDF("plane100.urdf")
-# cube = p.loadURDF("cube.urdf", [0, 0, 1])
+# p.connect(p.GUI)
+# p.setAdditionalSearchPath(pybullet_data.getDataPath())
+# # plane = p.loadURDF("plane100.urdf")
+# # cube = p.loadURDF("cube.urdf", [0, 0, 1])
 
-useFixedBase = True
-flags = p.URDF_INITIALIZE_SAT_FEATURES#0#p.URDF_USE_SELF_COLLISION
+# useFixedBase = True
+# flags = p.URDF_INITIALIZE_SAT_FEATURES#0#p.URDF_USE_SELF_COLLISION
 
-table_pos = [0,0,-0.625]
-plane_pos = [0,0,-0.625]
-plane = p.loadURDF("plane.urdf", plane_pos, flags = flags, useFixedBase=useFixedBase)
-table = p.loadURDF("table/table.urdf", table_pos, flags = flags, useFixedBase=useFixedBase)
-xarm = p.loadURDF("xarm/xarm6_with_gripper.urdf", [.65,0,0], flags = flags, useFixedBase=useFixedBase)
-cube = p.loadURDF("cube.urdf", [0,0, 1], flags= flags, globalScaling=.1)
-
-
-def getRayFromTo(mouseX, mouseY):
-  width, height, viewMat, projMat, cameraUp, camForward, horizon, vertical, _, _, dist, camTarget = p.getDebugVisualizerCamera(
-  )
-  camPos = [
-      camTarget[0] - dist * camForward[0], camTarget[1] - dist * camForward[1],
-      camTarget[2] - dist * camForward[2]
-  ]
-  farPlane = 10000
-  rayForward = [(camTarget[0] - camPos[0]), (camTarget[1] - camPos[1]), (camTarget[2] - camPos[2])]
-  lenFwd = math.sqrt(rayForward[0] * rayForward[0] + rayForward[1] * rayForward[1] +
-                     rayForward[2] * rayForward[2])
-  invLen = farPlane * 1. / lenFwd
-  rayForward = [invLen * rayForward[0], invLen * rayForward[1], invLen * rayForward[2]]
-  rayFrom = camPos
-  oneOverWidth = float(1) / float(width)
-  oneOverHeight = float(1) / float(height)
-
-  dHor = [horizon[0] * oneOverWidth, horizon[1] * oneOverWidth, horizon[2] * oneOverWidth]
-  dVer = [vertical[0] * oneOverHeight, vertical[1] * oneOverHeight, vertical[2] * oneOverHeight]
-  rayToCenter = [
-      rayFrom[0] + rayForward[0], rayFrom[1] + rayForward[1], rayFrom[2] + rayForward[2]
-  ]
-  ortho = [
-      -0.5 * horizon[0] + 0.5 * vertical[0] + float(mouseX) * dHor[0] - float(mouseY) * dVer[0],
-      -0.5 * horizon[1] + 0.5 * vertical[1] + float(mouseX) * dHor[1] - float(mouseY) * dVer[1],
-      -0.5 * horizon[2] + 0.5 * vertical[2] + float(mouseX) * dHor[2] - float(mouseY) * dVer[2]
-  ]
-
-  rayTo = [
-      rayFrom[0] + rayForward[0] + ortho[0], rayFrom[1] + rayForward[1] + ortho[1],
-      rayFrom[2] + rayForward[2] + ortho[2]
-  ]
-  lenOrtho = math.sqrt(ortho[0] * ortho[0] + ortho[1] * ortho[1] + ortho[2] * ortho[2])
-  alpha = math.atan(lenOrtho / farPlane)
+# table_pos = [0,0,1]
+# plane_pos = [0,0,1]
+# plane = p.loadURDF("plane.urdf", plane_pos, flags = flags, useFixedBase=useFixedBase)
+# table = p.loadURDF("table/table.urdf", table_pos, flags = flags, useFixedBase=useFixedBase)
+# xarm = p.loadURDF("xarm/xarm6_with_gripper.urdf", [.65,0,0], flags = flags, useFixedBase=useFixedBase)
+# cube = p.loadURDF("cube.urdf", flags= p.URDF_USE_INERTIA_FROM_FILE, globalScaling=.1)
 
 
-  return rayFrom, rayTo, alpha
+# def getRayFromTo(mouseX, mouseY):
+#   width, height, viewMat, projMat, cameraUp, camForward, horizon, vertical, _, _, dist, camTarget = p.getDebugVisualizerCamera(
+#   )
+#   camPos = [
+#       camTarget[0] - dist * camForward[0], camTarget[1] - dist * camForward[1],
+#       camTarget[2] - dist * camForward[2]
+#   ]
+#   farPlane = 10000
+#   rayForward = [(camTarget[0] - camPos[0]), (camTarget[1] - camPos[1]), (camTarget[2] - camPos[2])]
+#   lenFwd = math.sqrt(rayForward[0] * rayForward[0] + rayForward[1] * rayForward[1] +
+#                      rayForward[2] * rayForward[2])
+#   invLen = farPlane * 1. / lenFwd
+#   rayForward = [invLen * rayForward[0], invLen * rayForward[1], invLen * rayForward[2]]
+#   rayFrom = camPos
+#   oneOverWidth = float(1) / float(width)
+#   oneOverHeight = float(1) / float(height)
+
+#   dHor = [horizon[0] * oneOverWidth, horizon[1] * oneOverWidth, horizon[2] * oneOverWidth]
+#   dVer = [vertical[0] * oneOverHeight, vertical[1] * oneOverHeight, vertical[2] * oneOverHeight]
+#   rayToCenter = [
+#       rayFrom[0] + rayForward[0], rayFrom[1] + rayForward[1], rayFrom[2] + rayForward[2]
+#   ]
+#   ortho = [
+#       -0.5 * horizon[0] + 0.5 * vertical[0] + float(mouseX) * dHor[0] - float(mouseY) * dVer[0],
+#       -0.5 * horizon[1] + 0.5 * vertical[1] + float(mouseX) * dHor[1] - float(mouseY) * dVer[1],
+#       -0.5 * horizon[2] + 0.5 * vertical[2] + float(mouseX) * dHor[2] - float(mouseY) * dVer[2]
+#   ]
+
+#   rayTo = [
+#       rayFrom[0] + rayForward[0] + ortho[0], rayFrom[1] + rayForward[1] + ortho[1],
+#       rayFrom[2] + rayForward[2] + ortho[2]
+#   ]
+#   lenOrtho = math.sqrt(ortho[0] * ortho[0] + ortho[1] * ortho[1] + ortho[2] * ortho[2])
+#   alpha = math.atan(lenOrtho / farPlane)
 
 
-width, height, viewMat, projMat, cameraUp, camForward, horizon, vertical, _, _, dist, camTarget = p.getDebugVisualizerCamera(
-)
-camPos = [
-    camTarget[0] - dist * camForward[0], camTarget[1] - dist * camForward[1],
-    camTarget[2] - dist * camForward[2]
-]
-farPlane = 10000
-rayForward = [(camTarget[0] - camPos[0]), (camTarget[1] - camPos[1]), (camTarget[2] - camPos[2])]
-lenFwd = math.sqrt(rayForward[0] * rayForward[0] + rayForward[1] * rayForward[1] +
-                   rayForward[2] * rayForward[2])
-oneOverWidth = float(1) / float(width)
-oneOverHeight = float(1) / float(height)
-dHor = [horizon[0] * oneOverWidth, horizon[1] * oneOverWidth, horizon[2] * oneOverWidth]
-dVer = [vertical[0] * oneOverHeight, vertical[1] * oneOverHeight, vertical[2] * oneOverHeight]
+#   return rayFrom, rayTo, alpha
 
-lendHor = math.sqrt(dHor[0] * dHor[0] + dHor[1] * dHor[1] + dHor[2] * dHor[2])
-lendVer = math.sqrt(dVer[0] * dVer[0] + dVer[1] * dVer[1] + dVer[2] * dVer[2])
 
-cornersX = [0, width, width, 0]
-cornersY = [0, 0, height, height]
-corners3D = []
+# width, height, viewMat, projMat, cameraUp, camForward, horizon, vertical, _, _, dist, camTarget = p.getDebugVisualizerCamera(
+# )
+# camPos = [
+#     camTarget[0] - dist * camForward[0], camTarget[1] - dist * camForward[1],
+#     camTarget[2] - dist * camForward[2]
+# ]
+# farPlane = 10000
+# rayForward = [(camTarget[0] - camPos[0]), (camTarget[1] - camPos[1]), (camTarget[2] - camPos[2])]
+# lenFwd = math.sqrt(rayForward[0] * rayForward[0] + rayForward[1] * rayForward[1] +
+#                    rayForward[2] * rayForward[2])
+# oneOverWidth = float(1) / float(width)
+# oneOverHeight = float(1) / float(height)
+# dHor = [horizon[0] * oneOverWidth, horizon[1] * oneOverWidth, horizon[2] * oneOverWidth]
+# dVer = [vertical[0] * oneOverHeight, vertical[1] * oneOverHeight, vertical[2] * oneOverHeight]
 
-imgW = int(width / 10)
-imgH = int(height / 10)
+# lendHor = math.sqrt(dHor[0] * dHor[0] + dHor[1] * dHor[1] + dHor[2] * dHor[2])
+# lendVer = math.sqrt(dVer[0] * dVer[0] + dVer[1] * dVer[1] + dVer[2] * dVer[2])
 
-img = p.getCameraImage(imgW, imgH, renderer=p.ER_BULLET_HARDWARE_OPENGL)
-rgbBuffer = np.reshape(img[2], (imgH, imgW, 4))
-# NOTE: this depth buffer's reshaping does not match the [w, h] convention for
-# OpenGL depth buffers.  See getCameraImageTest.py for an OpenGL depth buffer
-depthBuffer = np.reshape(img[3], [imgH, imgW])
-print("rgbBuffer.shape=", rgbBuffer.shape)
-print("depthBuffer.shape=", depthBuffer.shape)
+# cornersX = [0, width, width, 0]
+# cornersY = [0, 0, height, height]
+# corners3D = []
 
-#disable rendering temporary makes adding objects faster
-p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
-p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
-p.configureDebugVisualizer(p.COV_ENABLE_TINY_RENDERER, 0)
-visualShapeId = p.createVisualShape(shapeType=p.GEOM_SPHERE, rgbaColor=[1, 1, 1, 1], radius=0.03)
-collisionShapeId = -1  #p.createCollisionShape(shapeType=p.GEOM_MESH, fileName="duck_vhacd.obj", collisionFramePosition=shift,meshScale=meshScale)
+# imgW = int(width / 10)
+# imgH = int(height / 10)
 
-for i in range(4):
-  w = cornersX[i]
-  h = cornersY[i]
-  rayFrom, rayTo, _ = getRayFromTo(w, h)
-  rf = np.array(rayFrom)
-  rt = np.array(rayTo)
-  vec = rt - rf
-  l = np.sqrt(np.dot(vec, vec))
-  newTo = (0.01 / l) * vec + rf
-  #print("len vec=",np.sqrt(np.dot(vec,vec)))
+# img = p.getCameraImage(imgW, imgH, renderer=p.ER_BULLET_HARDWARE_OPENGL)
+# rgbBuffer = np.reshape(img[2], (imgH, imgW, 4))
+# # NOTE: this depth buffer's reshaping does not match the [w, h] convention for
+# # OpenGL depth buffers.  See getCameraImageTest.py for an OpenGL depth buffer
+# depthBuffer = np.reshape(img[3], [imgH, imgW])
+# print("rgbBuffer.shape=", rgbBuffer.shape)
+# print("depthBuffer.shape=", depthBuffer.shape)
 
-  p.addUserDebugLine(rayFrom, newTo, [1, 0, 0])
-  corners3D.append(newTo)
-count = 0
+# #disable rendering temporary makes adding objects faster
+# p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
+# p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+# p.configureDebugVisualizer(p.COV_ENABLE_TINY_RENDERER, 0)
+# visualShapeId = p.createVisualShape(shapeType=p.GEOM_SPHERE, rgbaColor=[1, 1, 1, 1], radius=0.03)
+# collisionShapeId = -1  #p.createCollisionShape(shapeType=p.GEOM_MESH, fileName="duck_vhacd.obj", collisionFramePosition=shift,meshScale=meshScale)
 
-stepX = 5
-stepY = 5
-pcd = []
-for w in range(0, imgW, stepX):
-  for h in range(0, imgH, stepY):
-    count += 1
-    if ((count % 100) == 0):
-      print(count, "out of ", imgW * imgH / (stepX * stepY))
-    rayFrom, rayTo, alpha = getRayFromTo(w * (width / imgW), h * (height / imgH))
-    rf = np.array(rayFrom)
-    rt = np.array(rayTo)
-    vec = rt - rf
-    l = np.sqrt(np.dot(vec, vec))
-    depthImg = float(depthBuffer[h, w])
-    far = 1000.
-    near = 0.01
-    depth = far * near / (far - (far - near) * depthImg)
-    depth /= math.cos(alpha)
-    newTo = (depth / l) * vec + rf
-    p.addUserDebugLine(rayFrom, newTo, [1, 0, 0])
-    mb = p.createMultiBody(baseMass=0,
-                           baseCollisionShapeIndex=collisionShapeId,
-                           baseVisualShapeIndex=visualShapeId,
-                           basePosition=newTo,
-                           useMaximalCoordinates=True)
-    color = rgbBuffer[h, w]
-    color = [color[0] / 255., color[1] / 255., color[2] / 255., 1]
-    p.changeVisualShape(mb, -1, rgbaColor=color)
-    pcd.append(newTo)
+# for i in range(4):
+#   w = cornersX[i]
+#   h = cornersY[i]
+#   rayFrom, rayTo, _ = getRayFromTo(w, h)
+#   rf = np.array(rayFrom)
+#   rt = np.array(rayTo)
+#   vec = rt - rf
+#   l = np.sqrt(np.dot(vec, vec))
+#   newTo = (0.01 / l) * vec + rf
+#   #print("len vec=",np.sqrt(np.dot(vec,vec)))
+
+#   p.addUserDebugLine(rayFrom, newTo, [1, 0, 0])
+#   corners3D.append(newTo)
+# count = 0
+
+# stepX = 5
+# stepY = 5
+# pcd = []
+# for w in range(0, imgW, stepX):
+#   for h in range(0, imgH, stepY):
+#     count += 1
+#     if ((count % 100) == 0):
+#       print(count, "out of ", imgW * imgH / (stepX * stepY))
+#     rayFrom, rayTo, alpha = getRayFromTo(w * (width / imgW), h * (height / imgH))
+#     rf = np.array(rayFrom)
+#     rt = np.array(rayTo)
+#     vec = rt - rf
+#     l = np.sqrt(np.dot(vec, vec))
+#     depthImg = float(depthBuffer[h, w])
+#     far = 1000.
+#     near = 0.01
+#     depth = far * near / (far - (far - near) * depthImg)
+#     depth /= math.cos(alpha)
+#     newTo = (depth / l) * vec + rf
+#     p.addUserDebugLine(rayFrom, newTo, [1, 0, 0])
+#     mb = p.createMultiBody(baseMass=0,
+#                            baseCollisionShapeIndex=collisionShapeId,
+#                            baseVisualShapeIndex=visualShapeId,
+#                            basePosition=newTo,
+#                            useMaximalCoordinates=True)
+#     color = rgbBuffer[h, w]
+#     color = [color[0] / 255., color[1] / 255., color[2] / 255., 1]
+#     p.changeVisualShape(mb, -1, rgbaColor=color)
+#     pcd.append(newTo)
 
 
   
-p.addUserDebugLine(corners3D[0], corners3D[1], [1, 0, 0])
-p.addUserDebugLine(corners3D[1], corners3D[2], [1, 0, 0])
-p.addUserDebugLine(corners3D[2], corners3D[3], [1, 0, 0])
-p.addUserDebugLine(corners3D[3], corners3D[0], [1, 0, 0])
-p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
-print("ready\n")
+# p.addUserDebugLine(corners3D[0], corners3D[1], [1, 0, 0])
+# p.addUserDebugLine(corners3D[1], corners3D[2], [1, 0, 0])
+# p.addUserDebugLine(corners3D[2], corners3D[3], [1, 0, 0])
+# p.addUserDebugLine(corners3D[3], corners3D[0], [1, 0, 0])
+# p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
+# print("ready\n")
 
 
-#p.removeBody(plane)
-#p.removeBody(cube)
-while (1):
-  pcd_np = np.asarray(pcd)  # Convert pcd to numpy array
-  # Create an Open3D point cloud object
-  point_cloud_o3d = o3d.geometry.PointCloud()
-  point_cloud_o3d.points = o3d.utility.Vector3dVector(pcd_np)
-  # Visualize the point cloud
-  o3d.visualization.draw_geometries([point_cloud_o3d])
-  p.setGravity(0, 0, -10)
+# #p.removeBody(plane)
+# #p.removeBody(cube)
+# while (1):
+#   pcd_np = np.asarray(pcd)  # Convert pcd to numpy array
+#   # Create an Open3D point cloud object
+#   point_cloud_o3d = o3d.geometry.PointCloud()
+#   point_cloud_o3d.points = o3d.utility.Vector3dVector(pcd_np)
+#   # Visualize the point cloud
+#   o3d.visualization.draw_geometries([point_cloud_o3d])
+#   p.setGravity(0, 0, -10)
+
+import time
+import pybullet as p
+import pybullet_data
+from urdf_models import models_data
+import random
+
+
+# initialize the GUI and others
+p.connect(p.GUI)
+p.resetDebugVisualizerCamera(3, 90, -30, [0.0, -0.0, -0.0])
+p.setTimeStep(1 / 240.)
+p.setAdditionalSearchPath(pybullet_data.getDataPath())
+
+# load urdf data
+models = models_data.model_lib()
+
+# load model list
+namelist = models.model_name_list
+print("Look at what we have {}".format(namelist))
+
+# Load table and plane
+p.loadURDF("plane.urdf")
+p.loadURDF("table/table.urdf")
+
+# load the randomly picked model
+flags = p.URDF_USE_INERTIA_FROM_FILE
+# randomly get a model
+#for i in range(8):
+#    random_model = namelist[random.randint(0, len(namelist))] 
+#    p.loadURDF(models[random_model], [0., 0., 0.8 + 0.15*i], flags=flags)
+
+#stacking plates!!! :D
+#for i in range(4):
+#    p.loadURDF(models[namelist[1]], [0., 0., 0.8 + 0.15*i], flags=flags)
+
+
+#more random location
+obj = 4
+obj_coord = []
+col_coord = []
+while(obj > 0):
+    random_val = random.randint(-3, 3)
+    x, y, z = 0.15 *random_val, 0.15*random_val, 0.8 + 0.15
+    coord = [x, y, z]
+    if coord not in obj_coord:
+      obj_coord.append(coord)
+      p.loadURDF(models[namelist[1]], [x, y, z], flags=flags)
+      obj -= 1
+    else:
+       col_coord.append(coord)
+       continue
+    
+p.setGravity(0, 0, -9.8)
+
+while 1:
+    p.stepSimulation()
+    time.sleep(1./240)
