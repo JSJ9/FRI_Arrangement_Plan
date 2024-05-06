@@ -1,8 +1,4 @@
 #https://github.com/ChenEating716/pybullet-URDF-models --for table and random objects
-#https://github.com/robot-descriptions/awesome-robot-descriptions?tab=readme-ov-file -- sawyer, we might not
-#need it tho because we are only using pybullet to get valid pointclouds
-#https://github.com/RethinkRobotics/sawyer_robot.git
-#https://github.com/bulletphysics/bullet3/blob/master/examples/pybullet/examples/pointCloudFromCameraImage.py
 
 import time
 import pybullet as p
@@ -46,21 +42,10 @@ def simulation():
     p.loadURDF(models[namelist[len(namelist)-2]],[-.5, 0,0.65], flags=flags),
     p.loadURDF(models[namelist[len(namelist)-2]], [.5, 0, 0.65], flags=flags),
     p.loadURDF(models[namelist[len(namelist)-2]],[0,-.3,0.65], flags=flags)]
-    # load the randomly picked model
 
-    # randomly get a model
-    #for i in range(8):
-    #    random_model = namelist[random.randint(0, len(namelist))] 
-    #    p.loadURDF(models[random_model], [0., 0., 0.8 + 0.15*i], flags=flags)
 
-    #stacking plates!!! :D
-    #for i in range(4):
-    #    p.loadURDF(models[namelist[1]], [0., 0., 0.8 + 0.15*i], flags=flags)
-
-    #more random location
-
-    valid = [] 
-    col = []  # Initialize valid as an empty list
+    valid = [] #lis of valid poses
+    col = [] #list of invalid poses
     for i in range(100):
     #contains coords [x,y,z] for each plate in the plane
         obj_coord = []
@@ -94,17 +79,17 @@ def simulation():
         else: 
             col.append(obj_coord)
       
-        # Remove bodies
+        # remove bodies
         for plate in plates:
             p.removeBody(plate)
 
        
-
     p.setGravity(0, 0, -9.8)
 
     while 1:
         p.stepSimulation()
         time.sleep(1./220)
+    
 
 if __name__ == "__main__":
     simulation()
