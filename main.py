@@ -1,4 +1,8 @@
-#https://github.com/ChenEating716/pybullet-URDF-models --for table and random objects
+# Student: Clarrisa Mata, Janine Jimenez, Linh Tran
+# Course: FRI 309
+# 
+# Date:05/06/2024
+# Description of Program: Pybullet simulation for rearrangement learning
 
 import time
 import pybullet as p
@@ -41,7 +45,8 @@ def simulation():
     p.loadURDF(models[namelist[len(namelist)-2]], [0,.3,.65], flags=flags),
     p.loadURDF(models[namelist[len(namelist)-2]],[-.5, 0,0.65], flags=flags),
     p.loadURDF(models[namelist[len(namelist)-2]], [.5, 0, 0.65], flags=flags),
-    p.loadURDF(models[namelist[len(namelist)-2]],[0,-.3,0.65], flags=flags)]
+    p.loadURDF(models[namelist[len(namelist)-2]],[0,-.3,0.65], flags=flags)
+    ]
 
 
     valid = [] #lis of valid poses
@@ -53,7 +58,7 @@ def simulation():
         for j in range(4):
             random_val = random.uniform(-4.9, 4.9)
             random_val2 = random.uniform(-4.9, 4.9)
-            x, y, z = 0.15 * random_val, 0.1 * random_val2, 0.65
+            x, y, z = 0.1 * random_val, 0.1 * random_val2, 0.65
             coord = [x, y, z]
             if coord not in obj_coord:
                 obj_coord.append(coord)
