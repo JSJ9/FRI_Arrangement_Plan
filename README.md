@@ -11,12 +11,12 @@ Our initial goals included:
 4. Create a policy for a Sawyer robot to arrange items on a table without any human help.
 5. Have the Sawyer robot measure objects without predetermined measurements.
 
-Obstacles
+**Obstacles**
 - Setting up Pybullet and Packages on lab computers
 - Generating Point Clouds: Initially wanted to use Point Clouds as one of our inputs and tried to convert from image to pixels from the depth camera provided by PyBullet, but there were too many issues and too little time so we had to move on.
 - Lacked concrete approach to initial goals. Unsure about how to approach our goals and asked for help from professor and teacher assistants, but due to time and difficulty, could not find a solid path.
 
-Redirection
+**Redirection**
 - Create an environment in PyBullet.
 - Generate random locations to place plates on within the bounds of a table.
 - Determine valid positions by checking for collisions and add them to an array of position values.
