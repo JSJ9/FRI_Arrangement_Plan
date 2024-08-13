@@ -1,5 +1,6 @@
-ROBOT LEARNING FRESHMAN RESEARCH INITIATIVE
-Team Members: Janine, Clarisse, Linh
+**ROBOT LEARNING FRESHMAN RESEARCH INITIATIVE**
+
+*Team Members: Janine, Clarisse, Linh*
 
 This repository contains code that was used to develop our 2-week team project over Rearrangement Planning.
 
@@ -21,10 +22,9 @@ Redirection
 - Determine valid positions by checking for collisions and add them to an array of position values.
 - Have the robot create a new arrangement on its own.
 
-  This Redirection was much more realistic and achievable given the amount of time we had left. Additionally, we were able to work through
-  schedule conflicts, meet up times, and other outside factors that would hinder our progress on this project.
+This Redirection was much more realistic and achievable given the amount of time we had left. Additionally, we were able to work through schedule conflicts, meet up times, and other outside factors that would hinder our progress on this project.
 
-  Below are some pictures of our simulations in PyBullet.
+  *Below are some pictures of our simulations in PyBullet.*
 
 Set Up in PyBullet:
 ![image](https://github.com/user-attachments/assets/09b4b43c-0cb6-44bd-9477-910ecb06b873)
