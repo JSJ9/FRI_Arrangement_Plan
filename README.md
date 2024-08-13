@@ -1,6 +1,6 @@
 **ROBOT LEARNING FRESHMAN RESEARCH INITIATIVE**
 
-*Team Members: Janine, Clarisse, Linh*
+*Team Members: Janine, Clarissa, Linh*
 
 This repository contains code that was used to develop our 2-week team project over Rearrangement Planning.
 
